@@ -29,8 +29,6 @@
   * module "aurora_db" {
   *   source                    = "../.."
   *   name                      = "test-aurora-db"
-  *   envname                   = "test"
-  *   envtype                   = "test"
   *   subnets                   = ["${module.vpc.private_subnets}"]
   *   azs                       = ["${module.vpc.availability_zones}"]
   *   replica_count             = "1"
@@ -55,15 +53,14 @@ resource "aws_db_subnet_group" "main" {
   description = "Group of DB subnets"
   subnet_ids  = ["${var.subnets}"]
 
-  tags {
-    envname = "${var.envname}"
-    envtype = "${var.envtype}"
+  tags = {
+    "${var.tags}"
   }
 }
 
 // Create single DB instance
 resource "aws_rds_cluster_instance" "cluster_instance_0" {
-  identifier                   = "${var.envname}-aurora-node-0"
+  identifier                   = "${var.name}-aurora-node-0"
   cluster_identifier           = "${aws_rds_cluster.default.id}"
   instance_class               = "${var.instance_type}"
   publicly_accessible          = "${var.publicly_accessible}"
@@ -76,9 +73,8 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
   auto_minor_version_upgrade   = "${var.auto_minor_version_upgrade}"
   promotion_tier               = "0"
 
-  tags {
-    envname = "${var.envname}"
-    envtype = "${var.envtype}"
+  tags = {
+    "${var.tags}"
   }
 }
 
@@ -86,7 +82,7 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
 resource "aws_rds_cluster_instance" "cluster_instance_n" {
   depends_on                   = ["aws_rds_cluster_instance.cluster_instance_0"]
   count                        = "${var.replica_count}"
-  identifier                   = "${var.envname}-aurora-node-${count.index + 1}"
+  identifier                   = "${var.name}-aurora-node-${count.index + 1}"
   cluster_identifier           = "${aws_rds_cluster.default.id}"
   instance_class               = "${var.instance_type}"
   publicly_accessible          = "${var.publicly_accessible}"
@@ -99,15 +95,14 @@ resource "aws_rds_cluster_instance" "cluster_instance_n" {
   auto_minor_version_upgrade   = "${var.auto_minor_version_upgrade}"
   promotion_tier               = "${count.index + 1}"
 
-  tags {
-    envname = "${var.envname}"
-    envtype = "${var.envtype}"
+  tags = {
+    "${var.tags}"
   }
 }
 
 // Create DB Cluster
 resource "aws_rds_cluster" "default" {
-  cluster_identifier              = "${var.envname}-aurora-cluster"
+  cluster_identifier              = "${var.name}"
   availability_zones              = ["${var.azs}"]
   master_username                 = "${var.username}"
   master_password                 = "${var.password}"
@@ -123,6 +118,10 @@ resource "aws_rds_cluster" "default" {
   storage_encrypted               = "${var.storage_encrypted}"
   apply_immediately               = "${var.apply_immediately}"
   db_cluster_parameter_group_name = "${var.db_cluster_parameter_group_name}"
+  
+  tags = {
+    "${var.tags}"
+  }
 }
 
 // Geneate an ID when an environment is initialised
@@ -148,7 +147,7 @@ data "aws_iam_policy_document" "monitoring-rds-assume-role-policy" {
 
 resource "aws_iam_role" "rds-enhanced-monitoring" {
   count              = "${var.monitoring_interval > 0 ? 1 : 0}"
-  name               = "rds-enhanced-monitoring-${var.envname}"
+  name               = "rds-enhanced-monitoring-${var.name}"
   assume_role_policy = "${data.aws_iam_policy_document.monitoring-rds-assume-role-policy.json}"
 }
 

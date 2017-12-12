@@ -8,16 +8,6 @@ variable "subnets" {
   description = "List of subnet IDs to use"
 }
 
-variable "envname" {
-  type        = "string"
-  description = "Environment name (eg,test, stage or prod)"
-}
-
-variable "envtype" {
-  type        = "string"
-  description = "Environment type (eg,prod or nonprod)"
-}
-
 variable "azs" {
   type        = "list"
   description = "List of AZs to use"
@@ -162,4 +152,8 @@ variable "cw_max_replica_lag" {
   type        = "string"
   default     = "2000"
   description = "Maximum Aurora replica lag in milliseconds above which to alarm"
+}
+
+variable "tags" {
+  default = {}
 }
