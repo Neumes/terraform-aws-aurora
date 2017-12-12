@@ -53,9 +53,7 @@ resource "aws_db_subnet_group" "main" {
   description = "Group of DB subnets"
   subnet_ids  = ["${var.subnets}"]
 
-  tags = {
-    "${var.tags}"
-  }
+  tags = "${var.tags}"
 }
 
 // Create single DB instance
@@ -73,9 +71,7 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
   auto_minor_version_upgrade   = "${var.auto_minor_version_upgrade}"
   promotion_tier               = "0"
 
-  tags = {
-    "${var.tags}"
-  }
+  tags = "${var.tags}"
 }
 
 // Create 'n' number of additional DB instance(s) in same cluster
@@ -95,9 +91,7 @@ resource "aws_rds_cluster_instance" "cluster_instance_n" {
   auto_minor_version_upgrade   = "${var.auto_minor_version_upgrade}"
   promotion_tier               = "${count.index + 1}"
 
-  tags = {
-    "${var.tags}"
-  }
+  tags = "${var.tags}"
 }
 
 // Create DB Cluster
@@ -119,9 +113,7 @@ resource "aws_rds_cluster" "default" {
   apply_immediately               = "${var.apply_immediately}"
   db_cluster_parameter_group_name = "${var.db_cluster_parameter_group_name}"
   
-  tags = {
-    "${var.tags}"
-  }
+  tags = "${var.tags}"
 }
 
 // Geneate an ID when an environment is initialised
